@@ -1,0 +1,1 @@
+WMIC PROCESS WHERE name="LeagueClientUx.exe" GET commandline
