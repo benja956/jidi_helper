@@ -1,10 +1,68 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-                           QLabel, QFrame, QApplication)
+                           QLabel, QFrame, QApplication, QPushButton)
 from PyQt6.QtCore import Qt, QPoint, QTimer
 from PyQt6.QtGui import QColor, QPalette
 import win32gui
 import win32con
 from .data_manager import DataManager
+from .lcu import LCUClient
+
+class RestartButton(QFrame):
+    def __init__(self):
+        super().__init__()
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setFixedWidth(200-12)
+        self.setup_ui()
+        self.setup_style()
+        self.lcu_client = LCUClient()
+        
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 10, 10, 25)  # 左侧边距增加到25px
+        layout.setSpacing(10)
+        
+        # 创建重启按钮
+        restart_btn = QPushButton("重启客户端")
+        restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        restart_btn.clicked.connect(self.restart_client)
+        layout.addWidget(restart_btn)
+        
+    def setup_style(self):
+        self.setStyleSheet("""
+            QFrame {
+                background-color: rgba(0, 0, 0, 180);
+                border: none;
+            }
+            QPushButton {
+                background-color: rgba(30, 30, 30, 180);
+                color: white;
+                border: 1px solid #666666;
+                border-radius: 4px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(60, 60, 60, 180);
+                border: 1px solid #888888;
+            }
+            QPushButton:pressed {
+                background-color: rgba(70, 70, 70, 180);
+                border: 1px solid #aaaaaa;
+            }
+        """)
+        
+    def restart_client(self):
+        try:
+            self.lcu_client.get_client_key()
+            self.lcu_client.restart_client()
+        except Exception as e:
+            print(f"重启客户端失败: {str(e)}")
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -208,6 +266,10 @@ class SummonerPanel(QFrame):
             
             layout.addWidget(row_container)
             
+        # 添加重启按钮面板
+        self.restart_button = RestartButton()
+        layout.addWidget(self.restart_button)
+        
         layout.addStretch()
         
     def setup_style(self):
