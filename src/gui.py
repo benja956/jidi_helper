@@ -281,17 +281,27 @@ class ChampionPanel(QFrame):
         
     def setup_ui(self):
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(210, 10, 10, 10)  # 左边留出空间给SummonerPanel
+        layout.setContentsMargins(210, 10, 10, 10)
         layout.setSpacing(10)
         
         # 添加12个英雄选择框
         for i in range(12):
             champion_box = QFrame()
             box_layout = QVBoxLayout(champion_box)
+            box_layout.setContentsMargins(5, 5, 5, 5)  # 减小内边距
+            box_layout.setSpacing(2)  # 减小标签之间的间距
             
             name_label = QLabel("等待数据...")
             win_rate_label = QLabel("胜率: --")
             rank_label = QLabel("排名: --")
+            
+            # 设置标签对齐方式
+            name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            win_rate_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            rank_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            # 设置自动换行
+            name_label.setWordWrap(True)
             
             self.champion_boxes.append((name_label, win_rate_label, rank_label))
             
@@ -300,7 +310,7 @@ class ChampionPanel(QFrame):
             box_layout.addWidget(rank_label)
             
             layout.addWidget(champion_box)
-            
+        
         layout.addStretch()
         
     def setup_style(self):
@@ -334,4 +344,36 @@ class ChampionPanel(QFrame):
                 labels = self.champion_boxes[i]
                 labels[0].setText(name)
                 labels[1].setText(f"胜率: {win_rate:.1f}%")
-                labels[2].setText(f"排名: {rank}") 
+                labels[2].setText(f"排名: {rank}")
+
+                # 获取标签所在的 QFrame
+                champion_box = labels[0].parent()
+                
+                # 直接使用 rank 判断是否是优质选择
+                if rank <= 30:
+                    champion_box.setStyleSheet("""
+                        QFrame {
+                            background-color: rgba(30, 30, 30, 180);
+                            border: 2px solid #FFD700;  /* 金色边框 */
+                            border-radius: 5px;
+                        }
+                        QLabel {
+                            color: white;
+                            background: transparent;
+                            border: none;  /* 移除标签的边框 */
+                        }
+                    """)
+                else:
+                    # 普通样式
+                    champion_box.setStyleSheet("""
+                        QFrame {
+                            background-color: rgba(30, 30, 30, 180);
+                            border: 1px solid #666666;
+                            border-radius: 5px;
+                        }
+                        QLabel {
+                            color: white;
+                            background: transparent;
+                            border: none;  /* 移除标签的边框 */
+                        }
+                    """) 
