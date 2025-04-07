@@ -133,4 +133,11 @@ class LCUClient:
             end_index: 结束索引
         """
         endpoint = Config.LCU_APIS['get_match_history'].format(puuid=puuid)
-        return self.request('GET', f'{endpoint}?begIndex={begin_index}&endIndex={end_index}') 
+        return self.request('GET', f'{endpoint}?begIndex={begin_index}&endIndex={end_index}')
+
+    def restart_client(self):
+        """重启英雄联盟客户端"""
+        try:
+            self.request('POST', '/riotclient/kill-and-restart-ux')
+        except Exception as e:
+            raise Exception(f"重启客户端失败: {str(e)}")
