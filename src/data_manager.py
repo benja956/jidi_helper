@@ -1,3 +1,5 @@
+import traceback
+
 from PyQt6.QtCore import QObject, pyqtSignal
 from .lcu import LCUClient
 from .analyzer import ARAMAnalyzer
@@ -95,4 +97,5 @@ class DataManager(QObject):
                 self.last_select_data = current_select_data
                 
         except Exception as e:
-            print(f"更新游戏数据失败: {str(e)}") 
+            print(f"更新游戏数据失败: {str(e)}")
+            print(traceback.format_exc())  # 输出完整的错误回溯信息
