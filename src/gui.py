@@ -23,7 +23,7 @@ class RestartButton(QFrame):
         
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 10, 10, 25)  # 左侧边距增加到25px
+        layout.setContentsMargins(0, 10, 10, 25)
         layout.setSpacing(10)
         
         # 创建重启按钮
@@ -31,6 +31,12 @@ class RestartButton(QFrame):
         restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         restart_btn.clicked.connect(self.restart_client)
         layout.addWidget(restart_btn)
+        
+        # 创建关闭按钮
+        close_btn = QPushButton("关闭软件")
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.clicked.connect(QApplication.instance().quit)
+        layout.addWidget(close_btn)
         
     def setup_style(self):
         self.setStyleSheet("""

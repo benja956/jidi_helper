@@ -1,5 +1,4 @@
 import subprocess
-import json
 import re
 import requests
 import urllib3
