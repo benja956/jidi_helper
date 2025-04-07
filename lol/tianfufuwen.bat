@@ -1,1 +1,0 @@
-E:\only_python\python.exe D:\projects\learn_spider\lol\clientinfo.py
