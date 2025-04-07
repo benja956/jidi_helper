@@ -3,6 +3,7 @@ import os
 import time
 import requests
 from .errors import DataUpdateError
+from datetime import datetime, timedelta
 
 class DataCrawler:
     def __init__(self):
@@ -14,7 +15,8 @@ class DataCrawler:
         
     def get_current_date(self):
         """获取当前数据日期"""
-        return time.strftime("%Y%m%d", time.localtime(time.time() - 2 * 60 * 60 * 24))
+        yesterday = datetime.now() - timedelta(days=1)
+        return yesterday.strftime("%Y%m%d")
         
     def get_data_path(self, date):
         """获取指定日期的数据文件路径"""
@@ -32,6 +34,21 @@ class DataCrawler:
         
     def fetch_online_data(self):
         """获取在线英雄数据"""
+        yesterday = datetime.now() - timedelta(days=1)
+        before_yesterday = datetime.now() - timedelta(days=2)
+        
+        # 先尝试获取昨天的数据
+        date = yesterday.strftime("%Y%m%d")
+        data = self.fetch_data_for_date(date)
+        
+        # 如果昨天的数据不存在，则获取前天的数据
+        if not data:
+            date = before_yesterday.strftime("%Y%m%d")
+            data = self.fetch_data_for_date(date)
+        
+        return data
+
+    def fetch_data_for_date(self, date):
         try:
             # 获取基础英雄列表
             hero_url = "https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js"
@@ -40,7 +57,7 @@ class DataCrawler:
             hero_data = hero_response.json()
             
             # 获取胜率数据
-            dtstatdate = self.get_current_date()
+            dtstatdate = date
             ts = int(time.time() * 1000)
             win_rate_url = f"https://lol.sw.game.qq.com/lol/lwdcommact/a20211015billboard/a20211015api/fight?dtstatdate={dtstatdate}&callback=getRankFightCallback&ts={ts}"
             win_rate_response = requests.get(win_rate_url, headers=self.headers)
@@ -104,7 +121,7 @@ class DataCrawler:
             
             # 保存数据
             self.save_data(champions, dtstatdate)
-            return champions
+            return {str(k): v for k, v in champions.items()}
             
         except requests.exceptions.RequestException as e:
             raise DataUpdateError(f"获取在线数据失败: {str(e)}")
