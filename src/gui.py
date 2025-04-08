@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
         # 设置数据更新定时器
         self.data_update_timer = QTimer(self)
         self.data_update_timer.timeout.connect(self.data_manager.update_game_data)
-        self.data_update_timer.start(2000)  # 每2秒更新一次数据
+        self.data_update_timer.start(500)  # 每0.5秒更新一次数据
         
         # 连接信号
         self.data_manager.summoner_data_updated.connect(self.summoner_panel.update_summoner)
@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
             # 设置主窗口位置（包含整个区域）
             self.setGeometry(
                 game_x - 200,  # 向左扩展200px
-                game_y - 200,  # 向上扩展200px
+                game_y - 150,  # 向上扩展200px
                 game_w + 200,  # 增加左侧面板宽度
                 game_h + 200   # 增加上方面板高度
             )
@@ -156,12 +156,14 @@ class MainWindow(QMainWindow):
                 game_h  # 与游戏窗口等高
             )
             
-            # 设置上方面板位置
+            # 设置上方面板位置（在游戏窗口上方居中）
+            # champion_panel_x = game_x + (game_w - 800) // 2  # 800是英雄选择面板的宽度
+            champion_panel_x = game_x-200   # 800是英雄选择面板的宽度
             self.champion_panel.setGeometry(
-                200 - 280,  # 从左侧面板右侧开始，再向左偏移280px
+                champion_panel_x - (game_x - 200),  # 相对于主窗口的位置
                 0,  # 相对于主窗口的上边缘
-                game_w,  # 与游戏窗口等宽
-                200  # 高度
+                800,  # 宽度
+                150  # 高度
             )
             
             self.show()
@@ -176,16 +178,16 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # 创建水平布局
-        layout = QHBoxLayout(central_widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        # 创建主布局
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
         
         # 添加左侧面板
         self.summoner_panel = SummonerPanel()
-        layout.addWidget(self.summoner_panel)
+        main_layout.addWidget(self.summoner_panel)
         
-        # 添加右侧容器（包含上方面板）
+        # 创建右侧容器
         right_container = QWidget()
         right_layout = QVBoxLayout(right_container)
         right_layout.setContentsMargins(0, 0, 0, 0)
@@ -201,7 +203,7 @@ class MainWindow(QMainWindow):
         spacer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)  # 鼠标事件穿透
         right_layout.addWidget(spacer)
         
-        layout.addWidget(right_container)
+        main_layout.addWidget(right_container)
 
 class SummonerPanel(QFrame):
     """左侧召唤师信息面板"""
@@ -341,22 +343,31 @@ class ChampionPanel(QFrame):
             Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedHeight(200)
+        self.setFixedHeight(150)
         self.setFixedWidth(1280)
         self.champion_boxes = []
         self.setup_ui()
         self.setup_style()
         
     def setup_ui(self):
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(210, 10, 10, 10)
-        layout.setSpacing(10)
+        # 创建主布局
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(0, 10, 0, 10)
+        main_layout.setSpacing(0)
         
-        # 添加12个英雄选择框
-        for i in range(12):
+        # 创建容器来放置英雄选择框
+        container = QWidget()
+        container.setFixedWidth(800)  # 设置容器固定宽度
+        container_layout = QHBoxLayout(container)
+        container_layout.setContentsMargins(0, 0, 0, 0)  # 移除容器的边距
+        container_layout.setSpacing(5)  # 减小卡片之间的间距
+        
+        # 添加10个英雄选择框
+        for i in range(10):
             champion_box = QFrame()
+            champion_box.setFixedWidth(75)  # 设置每个卡片的固定宽度
             box_layout = QVBoxLayout(champion_box)
-            box_layout.setContentsMargins(5, 5, 5, 5)  # 减小内边距
+            box_layout.setContentsMargins(3, 3, 3, 3)  # 减小内边距
             box_layout.setSpacing(2)  # 减小标签之间的间距
             
             name_label = QLabel("等待数据...")
@@ -377,9 +388,12 @@ class ChampionPanel(QFrame):
             box_layout.addWidget(win_rate_label)
             box_layout.addWidget(rank_label)
             
-            layout.addWidget(champion_box)
+            container_layout.addWidget(champion_box)
         
-        layout.addStretch()
+        # 将容器添加到主布局并居中
+        main_layout.addStretch(1)
+        main_layout.addWidget(container)
+        main_layout.addStretch(1)
         
     def setup_style(self):
         self.setStyleSheet("""
@@ -395,6 +409,7 @@ class ChampionPanel(QFrame):
             QLabel {
                 color: white;
                 background-color: transparent;
+                font-size: 12px;  /* 减小字体大小 */
             }
         """)
 
